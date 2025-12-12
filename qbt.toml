@@ -1,0 +1,4 @@
+[qbittorrent]
+addr = "http://127.0.0.1:(QBT_WEBUI_PORT)"
+login = "admin"
+password = "adminadmin"
