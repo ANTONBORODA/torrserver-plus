@@ -189,6 +189,31 @@ sed -i "/^QBT_ENABLED=/{h;s/=.*/=${QBT_ENABLED}/};\${x;/^$/{s//QBT_ENABLED=${QBT
 [ "$PROTONVPN_NAT_PMP" != "true" ] && export PROTONVPN_NAT_PMP=false
 sed -i "/^PROTONVPN_NAT_PMP=/{h;s/=.*/=${PROTONVPN_NAT_PMP}/};\${x;/^$/{s//PROTONVPN_NAT_PMP=${PROTONVPN_NAT_PMP}/;H};x}" $TS_CONF_PATH/ts.ini
 
+#  MIKROTIK_INTEGRATION
+[ -z "$MIKROTIK_INTEGRATION" ] && export MIKROTIK_INTEGRATION=true
+[ "$MIKROTIK_INTEGRATION" != "true" ] && export MIKROTIK_INTEGRATION=false
+sed -i "/^MIKROTIK_INTEGRATION=/{h;s/=.*/=${MIKROTIK_INTEGRATION}/};\${x;/^$/{s//MIKROTIK_INTEGRATION=${MIKROTIK_INTEGRATION}/;H};x}" $TS_CONF_PATH/ts.ini
+
+#if proton vpn PMP is on and mikrotik integration is on - parse the parameters
+if [ "$PROTONVPN_NAT_PMP" == "true" ]; then
+    if [ "$MIKROTIK_INTEGRATION" == "true" ]; then
+        #  MIKROTIK_ADDRESS
+        [ -z "$MIKROTIK_ADDRESS" ] && export MIKROTIK_ADDRESS="http://10.10.1.1"
+        sed -i "/^MIKROTIK_ADDRESS=/{h;s/=.*/=${MIKROTIK_ADDRESS}/};\${x;/^$/{s//MIKROTIK_ADDRESS=${MIKROTIK_ADDRESS}/;H};x}" $TS_CONF_PATH/ts.ini
+        
+        #  MIKROTIK_USERNAME
+        [ -z "$MIKROTIK_USERNAME" ] && export MIKROTIK_USERNAME="admin"
+        sed -i "/^MIKROTIK_USERNAME=/{h;s/=.*/=${MIKROTIK_USERNAME}/};\${x;/^$/{s//MIKROTIK_USERNAME=${MIKROTIK_USERNAME}/;H};x}" $TS_CONF_PATH/ts.ini
+        
+        #  MIKROTIK_PASSWORD
+        [ -z "$MIKROTIK_PASSWORD" ] && export MIKROTIK_PASSWORD=""
+        sed -i "/^MIKROTIK_PASSWORD=/{h;s/=.*/=${MIKROTIK_PASSWORD}/};\${x;/^$/{s//MIKROTIK_PASSWORD=${MIKROTIK_PASSWORD}/;H};x}" $TS_CONF_PATH/ts.ini
+        
+        #  MIKROTIK_NAT_RULE_COMMENT
+        [ -z "$MIKROTIK_NAT_RULE_COMMENT" ] && export MIKROTIK_NAT_RULE_COMMENT="ProtonVPN"
+        sed -i "/^MIKROTIK_NAT_RULE_COMMENT=/{h;s/=.*/=${MIKROTIK_NAT_RULE_COMMENT}/};\${x;/^$/{s//MIKROTIK_NAT_RULE_COMMENT=${MIKROTIK_NAT_RULE_COMMENT}/;H};x}" $TS_CONF_PATH/ts.ini
+    fi
+fi 
 
 # Set parameters in file qBittorrent.conf
 if [ "$QBT_ENABLED" == "true" ]; then
