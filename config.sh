@@ -53,17 +53,18 @@ if [ ! -s $TS_CONF_PATH/accs.db ]; then
     fi
 fi
 
-# File config.db
-if [ ! -s $TS_CONF_PATH/config.db ]; then
-    wget -q --no-check-certificate --user-agent="$USER_AGENT" --content-disposition "$FILES_URL/config.db" -O $TS_CONF_PATH/config.db
-    if [ -s $TS_CONF_PATH/config.db ]; then
+# File .qbt.toml
+if [ ! -s $TS_CONF_PATH/.qbt.toml ]; then
+    wget -q --no-check-certificate --user-agent="$USER_AGENT" --content-disposition "$FILES_URL/qbt.toml" -O $TS_CONF_PATH/.qbt.toml
+    if [ -s $TS_CONF_PATH/.qbt.toml ]; then
+        dos2unix $TS_CONF_PATH/.qbt.toml
         echo " "
         echo "============================================="
-        echo "$(date): File config.db downloaded from the github."
+        echo "$(date): File .qbt.toml downloaded from the github."
         echo "============================================="
         echo " "
     else
-        rm -f $TS_CONF_PATH/config.db
+        rm -f $TS_CONF_PATH/.qbt.toml
     fi
 fi
 
@@ -111,6 +112,7 @@ Scheduler\end_time=@Variant(\0\0\0\xf\0m\xdd\0)
 Scheduler\start_time=@Variant(\0\0\0\xf\x1I\x97\0)
 WebUI\LocalHostAuth=false
 WebUI\UseUPnP=false
+WebUI\Password_PBKDF2="@ByteArray(ARQ77eY1NUZaQsuDHbIMCA==:0WMRkYTUWVT9wVvdDtHAjU9b3b7uB8NR1Gur2hmQCvCDpm39Q+PsJRJPaCU51dEiz+dTzh8qbPsL8WkFljQYFQ==)"
 
 EOT
     fi
@@ -181,6 +183,11 @@ sed -i "/^FFPROBE_UPDATE=/{h;s/=.*/=${FFPROBE_UPDATE}/};\${x;/^$/{s//FFPROBE_UPD
 [ -z "$QBT_ENABLED" ] && export QBT_ENABLED=true
 [ "$QBT_ENABLED" != "true" ] && export QBT_ENABLED=false
 sed -i "/^QBT_ENABLED=/{h;s/=.*/=${QBT_ENABLED}/};\${x;/^$/{s//QBT_ENABLED=${QBT_ENABLED}/;H};x}" $TS_CONF_PATH/ts.ini
+
+#  PROTONVPN_NAT_PMP
+[ -z "$PROTONVPN_NAT_PMP" ] && export PROTONVPN_NAT_PMP=true
+[ "$PROTONVPN_NAT_PMP" != "true" ] && export PROTONVPN_NAT_PMP=false
+sed -i "/^PROTONVPN_NAT_PMP=/{h;s/=.*/=${PROTONVPN_NAT_PMP}/};\${x;/^$/{s//PROTONVPN_NAT_PMP=${PROTONVPN_NAT_PMP}/;H};x}" $TS_CONF_PATH/ts.ini
 
 
 # Set parameters in file qBittorrent.conf
@@ -304,6 +311,10 @@ if [ "$QBT_ENABLED" == "true" ]; then
         export QBT_IP_FILTER_ENABLED=false    
     fi
     sed -i -e "s|Session\\\IPFilteringEnabled=.*|Session\\\IPFilteringEnabled=${QBT_IP_FILTER_ENABLED}|g" $TS_CONF_PATH/qBittorrent/config/qBittorrent.conf
+    
+    echo " "
+    echo "Updating .qbt.toml config file..."
+    sed -i "s/(QBT_WEBUI_PORT)/${QBT_WEBUI_PORT}/g" $TS_CONF_PATH/.qbt.toml
     
     echo " "
     echo "----------------------------------------"

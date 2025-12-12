@@ -31,6 +31,14 @@ cron -f >> /var/log/cron.log 2>&1&
 
 MY_IP=$(ip route get 8.8.8.8 | grep -o -E "src .+" | cut -d ' ' -f 2)
 
+if [ "$PROTONVPN_NAT_PMP" == "true" ]; then
+    echo " "
+    echo "============================================="
+    echo "Starting ProtonVPN NAT PMP..."
+    ./proton_vpn_nat.sh &
+    echo "============================================="
+fi
+
 # Start qBittorrent
 if [ "$QBT_ENABLED" == "true" ]; then
     echo " "
@@ -38,10 +46,9 @@ if [ "$QBT_ENABLED" == "true" ]; then
     echo "$(date): Starting local qBittorrent ..."
     echo " "
     if [ $(pgrep qbittorrent-nox | wc -l) -eq 0 ]; then
-        qbittorrent-nox -d --webui-port=$QBT_WEBUI_PORT --profile=$TS_CONF_PATH --save-path=$QBT_TORR_DIR
+        ~/bin/qbittorrent-nox -d --webui-port=$QBT_WEBUI_PORT --profile=$TS_CONF_PATH --save-path=$QBT_TORR_DIR --confirm-legal-notice
         sleep 5
     fi
-    qbt settings set url http://localhost:$QBT_WEBUI_PORT
     echo " "
     echo "To access local qBittorrent web interface go to: http://$MY_IP:$QBT_WEBUI_PORT"
     echo "Default LOGIN / PASSWORD: admin / adminadmin"
