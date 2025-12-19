@@ -258,7 +258,7 @@ if [ "$QBT_ENABLED" == "true" ] && [ "$QBT_RESTART" == "true" ]; then
             sleep 1
         fi
     done
-    qbittorrent-nox -d --webui-port=$QBT_WEBUI_PORT --profile=$TS_CONF_PATH --save-path=$QBT_TORR_DIR
+    ~/bin/qbittorrent-nox -d --webui-port=$QBT_WEBUI_PORT --profile=$TS_CONF_PATH --save-path=$QBT_TORR_DIR
     sleep 5
 fi
 
