@@ -39,14 +39,7 @@ EOF
                 TORRENT_PROGRESS=0
             fi
             if [ $TORRENT_PROGRESS -gt $QBT_DOWNLOAD_THRESHOLD ]; then
-                [ "$QBT_ADD_PAUSED" == "true" ] && export QBT_TORRENT_OPT="--paused" || export QBT_TORRENT_OPT=""
-                qbt --config $TS_CONF_PATH/.qbt.toml torrent add url $QBT_TORRENT_OPT "$(jq -r '."torrents"."'"$HASH"'"."url"' $TS_STAT)"
-                qbt --config $TS_CONF_PATH/.qbt.toml torrent tracker add $HASH $QBT_LOCAL_TRACKER
-                qbt --config $TS_CONF_PATH/.qbt.toml torrent options -p true -s true $HASH
-                if [ "$QBT_ADD_MORE_TRACKERS" == "true" ] && [ -s "/TS/more_trackers.txt" ]; then
-                    qbt --config $TS_CONF_PATH/.qbt.toml torrent tracker add $HASH $(cat /TS/more_trackers.txt)
-                fi
-                [ "$QBT_ADD_PAUSED" != "false" ] && qbt --config $TS_CONF_PATH/.qbt.toml torrent reannounce $HASH
+                qbt --config $TS_CONF_PATH/.qbt.toml torrent add "$(jq -r '."torrents"."'"$HASH"'"."url"' $TS_STAT)"
             fi
         fi
     done

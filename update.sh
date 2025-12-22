@@ -143,32 +143,6 @@ if [ ! -z "$BIP_URL" ]; then
     echo " "
 fi
 
-
-# Update trackers list
-if [ "$QBT_ENABLED" == "true" ] && [ "$QBT_ADD_MORE_TRACKERS" == "true" ]; then
-    echo " "
-    echo "=================================================="
-    echo "$(date): Start updating additional trackers list ..."
-    echo " "
-    curl -f -s $QBT_TRACKERS_URL | grep -E "^(udp|http)" > /TS/trackers.tmp
-    list_size=$(wc -l /TS/trackers.tmp | cut -f 1 -d ' ')
-    if [ $list_size -gt 1 ]; then
-        TRACKERS=""
-        for tracker in $(cat /TS/trackers.tmp)
-        do
-            TRACKERS="$TRACKERS $tracker"
-        done
-        echo $TRACKERS > /TS/more_trackers.txt
-        chmod a+r /TS/more_trackers.txt
-        echo " "
-        echo "$(date): New trackers list size: $list_size strings."
-        rm -f /TS/trackers.tmp
-    else
-        echo "$(date): Error updating trackers list from URL: $QBT_TRACKERS_URL"
-    fi
-fi
-
-
 # Update TorrServer
 # =======================================================
 

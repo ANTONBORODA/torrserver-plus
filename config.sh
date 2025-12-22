@@ -288,16 +288,6 @@ if [ "$QBT_ENABLED" == "true" ]; then
     [ $QBT_DOWNLOAD_THRESHOLD -gt 100 ] && export QBT_DOWNLOAD_THRESHOLD=100
     sed -i "/^QBT_DOWNLOAD_THRESHOLD=/{h;s/=.*/=${QBT_DOWNLOAD_THRESHOLD}/};\${x;/^$/{s//QBT_DOWNLOAD_THRESHOLD=${QBT_DOWNLOAD_THRESHOLD}/;H};x}" $TS_CONF_PATH/ts.ini
 
-    #  QBT_ADD_PAUSED
-    [ -z "$QBT_ADD_PAUSED" ] && export QBT_ADD_PAUSED=false
-    [ "$QBT_ADD_PAUSED" != "false" ] && export QBT_ADD_PAUSED=true
-    sed -i "/^QBT_ADD_PAUSED=/{h;s/=.*/=${QBT_ADD_PAUSED}/};\${x;/^$/{s//QBT_ADD_PAUSED=${QBT_ADD_PAUSED}/;H};x}" $TS_CONF_PATH/ts.ini
-    
-    #  QBT_ADD_MORE_TRACKERS
-    [ -z "$QBT_ADD_MORE_TRACKERS" ] && export QBT_ADD_MORE_TRACKERS=true
-    [ "$QBT_ADD_MORE_TRACKERS" != "true" ] && export QBT_ADD_MORE_TRACKERS=false
-    sed -i "/^QBT_ADD_MORE_TRACKERS=/{h;s/=.*/=${QBT_ADD_MORE_TRACKERS}/};\${x;/^$/{s//QBT_ADD_MORE_TRACKERS=${QBT_ADD_MORE_TRACKERS}/;H};x}" $TS_CONF_PATH/ts.ini
-
     # Authorization in TorrServer for qbt_manager.sh
     export POST_AUTH=""
     if [ $(jq empty $TS_CONF_PATH/accs.db > /dev/null 2>&1; echo $?) -eq 0 ] && [ "$(echo "$TS_OPTIONS" | grep "\-a")" ]; then
@@ -313,16 +303,6 @@ if [ "$QBT_ENABLED" == "true" ]; then
 
     export QBT_CHECKS_TASK="\"\*/$QBT_CHECKS_TIMER \* \* \* \*\""
     crontab -l | { cat; echo "$(echo "$QBT_CHECKS_TASK" | sed 's/\\//g' | sed "s/\"//g") /qbt_manager.sh >> /var/log/cron.log 2>&1"; } | crontab -
-        
-    #  QBT_RESUME_HOUR (resume downloading all torrents at specified hour (from 0 to 23 hour))
-    if [ ! -z "$QBT_RESUME_HOUR" ]; then
-        [ $QBT_RESUME_HOUR -lt 0 ] && export QBT_RESUME_HOUR=0
-        [ $QBT_RESUME_HOUR -gt 23 ] && export QBT_RESUME_HOUR=23
-        sed -i "/^QBT_RESUME_HOUR=/{h;s/=.*/=${QBT_RESUME_HOUR}/};\${x;/^$/{s//QBT_RESUME_HOUR=${QBT_RESUME_HOUR}/;H};x}" $TS_CONF_PATH/ts.ini
-        
-        export QBT_RESUME_TASK="\"0 $QBT_RESUME_HOUR \* \* \*\""
-        crontab -l | { cat; echo "$(echo "$QBT_RESUME_TASK" | sed 's/\\//g' | sed "s/\"//g") /qbt_resume_torrents.sh >> /var/log/cron.log 2>&1"; } | crontab -
-    fi
     
     #  QBT_IPFilter
     if [ $(grep "(TS_CONF_PATH)/bip.dat" $TS_CONF_PATH/qBittorrent/config/qBittorrent.conf | wc -l) -gt 0 ]; then
