@@ -133,10 +133,6 @@ fi
 # Check vars, set defaults in ts.ini ==========================
 echo "$(date): Check vars, set defaults..."
 
-#  TS_RELEASE
-[ -z "$TS_RELEASE" ] && export TS_RELEASE=latest
-sed -i "/^TS_RELEASE=/{h;s/=.*/=${TS_RELEASE}/};\${x;/^$/{s//TS_RELEASE=${TS_RELEASE}/;H};x}" $TS_CONF_PATH/ts.ini
-
 #  TS_PORT
 [ -z "$TS_PORT" ] && export TS_PORT=8090
 sed -i "/^TS_PORT=/{h;s/=.*/=${TS_PORT}/};\${x;/^$/{s//TS_PORT=${TS_PORT}/;H};x}" $TS_CONF_PATH/ts.ini

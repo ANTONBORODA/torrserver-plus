@@ -146,26 +146,24 @@ fi
 # Update TorrServer
 # =======================================================
 
-if [ "$(curl -o /dev/null -s -w '%{http_code}\n' $TS_GIT_URL)" != "200" ]; then
-    export TS_URL=$TS_HOME_URL
-else
-    export TS_VER=$([ "$TS_RELEASE" != "latest" ] && echo tags/$TS_RELEASE || echo $TS_RELEASE)
-    export TS_URL=$TS_GIT_URL/$TS_VER
-fi
+export TS_URL=$TS_HOME_URL
+TS_DL_OS=$(uname | tr "[:upper:]" "[:lower:]")
+TS_DL_ARCH=$(dpkg --print-architecture | sed -e "s/armhf/arm7/" -e "s/i386/386/" -e "s/mips64el/mips64le/" -e "s/mipsel/mipsle/")
 
 [ -s /TS/TorrServer ] && TS_LOCAL_VER=$(/TS/TorrServer --version | cut -d ' ' -f 2) || TS_LOCAL_VER="none"
-TS_REMOTE_VER=$(curl -f -s $TS_URL | grep -E "(version|tag_name)" | cut -d ':' -f 2 | grep -o -E '\".+\"' | jq -r)
+TS_JSON=$(curl -f -s $TS_URL)
+TS_REMOTE_VER=$(echo "$TS_JSON" | jq -r '.version // empty')
+TS_DL_URL=$(echo "$TS_JSON" | jq -r --arg key "$TS_DL_OS-$TS_DL_ARCH" '.links[$key] // empty')
 
 echo " "
 echo "=================================================="
 echo "$(date): Start checking for TorrServer updates ..."
 echo " "
 
-if [ ! -z "$TS_REMOTE_VER" ] && [ "$TS_LOCAL_VER" != "$TS_REMOTE_VER" ]; then
+if [ ! -z "$TS_REMOTE_VER" ] && [ ! -z "$TS_DL_URL" ] && [ "$TS_LOCAL_VER" != "$TS_REMOTE_VER" ]; then
     echo "$(date): Updating TorrServer to version $TS_REMOTE_VER ..."
     echo " "
-    wget --no-verbose --no-check-certificate --user-agent="$USER_AGENT" --output-document=/tmp/ts/TorrServer --tries=3 \
-    $(curl -s $TS_URL | grep -o -E 'http.+\w+' | grep -i "$(uname)" | grep -i "$(dpkg --print-architecture | sed "s/armhf/arm7/g")")
+    wget --no-verbose --no-check-certificate --user-agent="$USER_AGENT" --output-document=/tmp/ts/TorrServer --tries=3 "$TS_DL_URL"
     if [ $? -eq 0 ]; then
         chmod a+x /tmp/ts/TorrServer
         TS_NEW_VER=$(/tmp/ts/TorrServer --version | cut -d ' ' -f 2)
@@ -191,7 +189,7 @@ if [ ! -z "$TS_REMOTE_VER" ] && [ "$TS_LOCAL_VER" != "$TS_REMOTE_VER" ]; then
         echo " "
     fi
 else
-    if [ -z "$TS_REMOTE_VER" ]; then
+    if [ -z "$TS_REMOTE_VER" ] || [ -z "$TS_DL_URL" ]; then
         echo "$(date): Update TorrServer failed. Check update source url: $TS_URL"
     else
         echo "$(date): Local TorrServer version is $TS_LOCAL_VER. Nothing to update or re-download."

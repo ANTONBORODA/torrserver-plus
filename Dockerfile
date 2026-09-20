@@ -4,9 +4,7 @@
 
 FROM ubuntu:latest
 
-ENV TS_GIT_URL="https://api.github.com/repos/YouROK/TorrServer/releases"
 ENV TS_HOME_URL="https://releases.yourok.ru/torr/server_release.json"
-ENV TS_RELEASE="latest"
 ENV TS_PORT=8090
 ENV TS_CONF_PATH=/TS/db
 ENV TS_CACHE_PATH=/TS/db/cache
@@ -54,9 +52,8 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && chmod +x /start.sh && chmod +x /config.sh && chmod +x /update.sh && chmod +x /ts_log_listener.sh && chmod +x /qbt_manager.sh && chmod +x /ps_exit.sh && chmod +x /proton_vpn_nat.sh \
     && mkdir -p /TS && chmod -R 666 /TS \
     && mkdir -p $TS_CONF_PATH && chmod -R 666 $TS_CONF_PATH \
-    && export TS_URL=$TS_GIT_URL/$([ "$TS_RELEASE" != "latest" ] && echo tags/$TS_RELEASE || echo $TS_RELEASE) \
     && wget --no-verbose --no-check-certificate --user-agent="$USER_AGENT" --output-document=/TS/TorrServer --tries=3 $(\
-       curl -s $TS_URL | grep -o -E 'http.+\w+' | grep -i "$(uname)" | grep -i "$(dpkg --print-architecture | sed "s/armhf/arm7/g")") \
+       curl -s $TS_HOME_URL | jq -r --arg key "$(uname | tr "[:upper:]" "[:lower:]")-$(dpkg --print-architecture | sed -e "s/armhf/arm7/" -e "s/i386/386/" -e "s/mips64el/mips64le/" -e "s/mipsel/mipsle/")" '.links[$key] // empty') \
     && chmod a+x /TS/TorrServer \
     && wget --no-verbose --no-check-certificate --user-agent="$USER_AGENT" --output-document=/tmp/ffprobe.zip --tries=3 $(\
        curl -s $FFBINARIES | jq '.bin | .[].ffprobe' | grep linux | \
